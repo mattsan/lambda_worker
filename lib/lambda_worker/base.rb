@@ -3,13 +3,26 @@ require 'active_support/core_ext/string'
 
 module LambdaWorker
   class Base
-    Config = Struct.new('Config',
-                        :aws_access_key_id,
-                        :aws_secret_access_key,
-                        :region,
-                        :profile,
-                        :base_name,
-                        :stage)
+    Config =
+      Struct.new('Config',
+                 :aws_access_key_id,
+                 :aws_secret_access_key,
+                 :region,
+                 :profile,
+                 :base_name,
+                 :stage)
+
+    SyncResponse =
+      Struct.new('SyncResponse',
+                 :status_code,
+                 :function_error,
+                 :log_result,
+                 :payload,
+                 :executed_version)
+
+    AsyncResponse =
+      Struct.new('AsyncResponse',
+                 :status_code)
 
     def self.configure
       yield config
@@ -17,16 +30,28 @@ module LambdaWorker
 
     def self.function(name)
       define_singleton_method(name) do |**args|
-        client.invoke(
+        response = client.invoke(
           function_name: function_name(name),
           payload: args.to_json
+        )
+
+        SyncResponse.new(
+          response.status_code,
+          response.function_error,
+          response.log_result,
+          JSON.parse(response.payload.read),
+          response.executed_version
         )
       end
 
       define_singleton_method("#{name}_async") do |**args|
-        client.invoke_async(
+        response = client.invoke_async(
           function_name: function_name(name),
           invoke_args: args.to_json
+        )
+
+        AsyncResponse.new(
+          response.status
         )
       end
     end
