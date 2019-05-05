@@ -15,7 +15,7 @@ RSpec.describe LambdaWorker do
   describe 'configurations' do
     describe 'stage' do
       describe 'default' do
-        it { expect(TestWorker.config[:stage]).to eq('test') }
+        it { expect(TestWorker.config.stage).to eq('test') }
         it { expect(TestWorker.function_name('some_function')).to eq('test-worker-test-some_function') }
       end
 
@@ -28,14 +28,16 @@ RSpec.describe LambdaWorker do
           end
         end
 
-        it { expect(TestWorker.config[:stage]).to eq('staging') }
+        it { expect(TestWorker.config.stage).to eq('staging') }
         it { expect(TestWorker.function_name('some_function')).to eq('test-worker-staging-some_function') }
       end
 
       describe 'configure dynamically' do
-        before { TestWorker.config.stage = 'production' }
+        before do
+          TestWorker.config.stage = 'production'
+        end
 
-        it { expect(TestWorker.config[:stage]).to eq('production') }
+        it { expect(TestWorker.config.stage).to eq('production') }
         it { expect(TestWorker.function_name('some_function')).to eq('test-worker-production-some_function') }
       end
     end
@@ -71,7 +73,7 @@ RSpec.describe LambdaWorker do
       it '.do_something' do
         response = TestWorker.sync.do_something(a: [1, 2, 3], b: [4, 5, 6])
         expect(response.status_code).to eq(200)
-        expect(response.payload).to eq({'c' => [3, 2, 1], 'd' => [6, 5, 4]})
+        expect(response.payload).to eq('c' => [3, 2, 1], 'd' => [6, 5, 4])
       end
     end
 

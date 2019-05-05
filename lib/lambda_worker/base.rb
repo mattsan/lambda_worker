@@ -2,22 +2,37 @@ require 'aws-sdk-lambda'
 require 'active_support/core_ext/string'
 
 module LambdaWorker
-  class Config < Struct.new(:aws_access_key_id,
-                            :aws_secret_access_key,
-                            :region,
-                            :profile,
-                            :base_name,
-                            :stage)
+  class Config
+    attr_accessor :aws_access_key_id,
+                  :aws_secret_access_key,
+                  :region,
+                  :profile,
+                  :base_name,
+                  :stage
   end
 
-  class SyncResponse < Struct.new(:status_code,
-                                  :function_error,
-                                  :log_result,
-                                  :payload,
-                                  :executed_version)
+  class SyncResponse
+    attr_reader :status_code,
+                :function_error,
+                :log_result,
+                :payload,
+                :executed_version
+
+    def initialize(status_code, function_error, log_result, payload, executed_version)
+      @status_code = status_code
+      @function_error = function_error
+      @log_result = log_result
+      @payload = payload
+      @executed_version = executed_version
+    end
   end
 
-  class AsyncResponse < Struct.new(:status_code)
+  class AsyncResponse
+    attr_reader :status_code
+
+    def initialize(status_code)
+      @status_code = status_code
+    end
   end
 
   class Base
@@ -43,7 +58,7 @@ module LambdaWorker
     def self.config
       unless @config
         @config = Config.new
-        @config.base_name = self.to_s.underscore.gsub('_', '-')
+        @config.base_name = to_s.underscore.tr('_', '-')
         @config.stage = 'development'
       end
       @config
@@ -61,32 +76,8 @@ module LambdaWorker
       @sync = sync
     end
 
-    def config
-      self.class.config
-    end
-
-    def client
-      return @client if @client
-
-      options = {
-        region: config.region
-      }
-
-      case
-      when config.profile
-        options[:profile] = config.profile
-      when config.aws_access_key_id && config.aws_secret_access_key
-        options[:credentials] = Aws::Credentials.new(config.aws_access_key_id, config.aws_secret_access_key)
-      end
-
-      @client = Aws::Lambda::Client.new(options)
-    end
-
     def invoke(function_name, args)
-      response = client.invoke(
-        function_name: function_name,
-        payload: args.to_json
-      )
+      response = client.invoke(function_name: function_name, payload: args.to_json)
 
       SyncResponse.new(
         response.status_code,
@@ -98,14 +89,32 @@ module LambdaWorker
     end
 
     def invoke_async(function_name, args)
-      response = client.invoke_async(
-        function_name: function_name,
-        invoke_args: args.to_json
-      )
+      response = client.invoke_async(function_name: function_name, invoke_args: args.to_json)
 
       AsyncResponse.new(
         response.status
       )
+    end
+
+    private
+
+    def client
+      @client ||= Aws::Lambda::Client.new(options)
+    end
+
+    def config
+      self.class.config
+    end
+
+    def options
+      result = {region: config.region}
+      result[:profile] = config.profile if config.profile
+      result[:credentials] = credentials if config.aws_access_key_id && config.aws_secret_access_key
+      result
+    end
+
+    def credentials
+      Aws::Credentials.new(config.aws_access_key_id, config.aws_secret_access_key)
     end
   end
 end

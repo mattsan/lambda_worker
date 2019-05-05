@@ -1,0 +1,7 @@
+inherit_gem:
+  deka_eiwakun: 'config/rubocop.yml'
+
+Metrics/BlockLength:
+  Exclude:
+    - '*.gemspec'
+    - 'spec/**/*.rb'

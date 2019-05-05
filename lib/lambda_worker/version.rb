@@ -3,5 +3,5 @@ module LambdaWorker
   MINOR = 1
   BUILD = 0
 
-  VERSION = "#{MAJOR}.#{MINOR}.#{BUILD}"
+  VERSION = "#{MAJOR}.#{MINOR}.#{BUILD}".freeze
 end
