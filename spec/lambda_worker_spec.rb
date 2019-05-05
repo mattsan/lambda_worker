@@ -19,7 +19,7 @@ RSpec.describe LambdaWorker do
         it { expect(TestWorker.function_name('some_function')).to eq('test-worker-test-some_function') }
       end
 
-      describe 'configure by a method configure' do
+      describe 'configure by a method' do
         before do
           class TestWorker
             configure do |config|
@@ -60,8 +60,8 @@ RSpec.describe LambdaWorker do
           payload: {a: [1, 2, 3], b: [4, 5, 6]}.to_json
         }
       end
-      let(:payload) { {c: [3, 2, 1], d: [6, 5, 4]} }
-      let(:response_params) { {status_code: 200, payload: StringIO.new(payload.to_json)} }
+      let(:response_payload) { {c: [3, 2, 1], d: [6, 5, 4]} }
+      let(:response_params) { {status_code: 200, payload: StringIO.new(response_payload.to_json)} }
       let(:invocation_response) { Aws::Lambda::Types::InvocationResponse.new(response_params) }
 
       before do
@@ -92,7 +92,7 @@ RSpec.describe LambdaWorker do
           .and_return(invocation_response)
       end
 
-      it '.do_something_async' do
+      it '.do_something' do
         response = TestWorker.async.do_something(a: [1, 2, 3], b: [4, 5, 6])
         expect(response.status_code).to eq(202)
       end
