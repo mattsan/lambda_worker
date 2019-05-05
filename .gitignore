@@ -9,3 +9,9 @@
 
 # rspec failure tracking
 .rspec_status
+
+# Serverless directories
+.serverless
+
+# package directories
+node_modules

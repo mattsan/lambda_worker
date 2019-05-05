@@ -1,0 +1,45 @@
+GIT
+  remote: https://github.com/mattsan/lambda_worker
+  revision: bbca3c19fb373ea6141c9083b6a3869b114d7fa9
+  specs:
+    lambda_worker (0.1.0)
+      activesupport
+      aws-sdk-lambda
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    activesupport (5.2.3)
+      concurrent-ruby (~> 1.0, >= 1.0.2)
+      i18n (>= 0.7, < 2)
+      minitest (~> 5.1)
+      tzinfo (~> 1.1)
+    aws-eventstream (1.0.3)
+    aws-partitions (1.158.0)
+    aws-sdk-core (3.49.0)
+      aws-eventstream (~> 1.0, >= 1.0.2)
+      aws-partitions (~> 1.0)
+      aws-sigv4 (~> 1.1)
+      jmespath (~> 1.0)
+    aws-sdk-lambda (1.22.0)
+      aws-sdk-core (~> 3, >= 3.48.2)
+      aws-sigv4 (~> 1.1)
+    aws-sigv4 (1.1.0)
+      aws-eventstream (~> 1.0, >= 1.0.2)
+    concurrent-ruby (1.1.5)
+    i18n (1.6.0)
+      concurrent-ruby (~> 1.0)
+    jmespath (1.4.0)
+    minitest (5.11.3)
+    thread_safe (0.3.6)
+    tzinfo (1.2.5)
+      thread_safe (~> 0.1)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  lambda_worker!
+
+BUNDLED WITH
+   2.0.1
