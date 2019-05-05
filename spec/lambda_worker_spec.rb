@@ -1,5 +1,6 @@
 class TestWorker < LambdaWorker::Base
   configure do |config|
+    config.stage = 'test'
     config.region = 'ap-northeast-1'
   end
 
@@ -14,11 +15,11 @@ RSpec.describe LambdaWorker do
   describe 'configurations' do
     describe 'stage' do
       describe 'default' do
-        it { expect(TestWorker.config[:stage]).to eq('development') }
-        it { expect(TestWorker.function_name('some_function')).to eq('test-worker-development-some_function') }
+        it { expect(TestWorker.config[:stage]).to eq('test') }
+        it { expect(TestWorker.function_name('some_function')).to eq('test-worker-test-some_function') }
       end
 
-      describe 'staging' do
+      describe 'configure by a method configure' do
         before do
           class TestWorker
             configure do |config|
@@ -31,14 +32,8 @@ RSpec.describe LambdaWorker do
         it { expect(TestWorker.function_name('some_function')).to eq('test-worker-staging-some_function') }
       end
 
-      describe 'production' do
-        before do
-          class TestWorker
-            configure do |config|
-              config.stage = 'production'
-            end
-          end
-        end
+      describe 'configure dynamically' do
+        before { TestWorker.config.stage = 'production' }
 
         it { expect(TestWorker.config[:stage]).to eq('production') }
         it { expect(TestWorker.function_name('some_function')).to eq('test-worker-production-some_function') }
@@ -59,7 +54,7 @@ RSpec.describe LambdaWorker do
     describe 'synchronously' do
       let(:invocation_request) do
         {
-          function_name: 'test-worker-production-do_something',
+          function_name: 'test-worker-test-do_something',
           payload: {a: [1, 2, 3], b: [4, 5, 6]}.to_json
         }
       end
@@ -74,7 +69,7 @@ RSpec.describe LambdaWorker do
       end
 
       it '.do_something' do
-        response = TestWorker.do_something(a: [1, 2, 3], b: [4, 5, 6])
+        response = TestWorker.sync.do_something(a: [1, 2, 3], b: [4, 5, 6])
         expect(response.status_code).to eq(200)
         expect(response.payload).to eq({'c' => [3, 2, 1], 'd' => [6, 5, 4]})
       end
@@ -83,7 +78,7 @@ RSpec.describe LambdaWorker do
     describe 'asynchronously' do
       let(:invocation_request) do
         {
-          function_name: 'test-worker-production-do_something',
+          function_name: 'test-worker-test-do_something',
           invoke_args: {a: [1, 2, 3], b: [4, 5, 6]}.to_json
         }
       end
@@ -96,7 +91,7 @@ RSpec.describe LambdaWorker do
       end
 
       it '.do_something_async' do
-        response = TestWorker.do_something_async(a: [1, 2, 3], b: [4, 5, 6])
+        response = TestWorker.async.do_something(a: [1, 2, 3], b: [4, 5, 6])
         expect(response.status_code).to eq(202)
       end
     end
